@@ -55,5 +55,5 @@ func mustConnection(ctx context.Context, config Config) {
 		panic(err)
 	}
 	logger.InfoContext(ctx, "KAFKA: connected to Kafka successfully")
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 }

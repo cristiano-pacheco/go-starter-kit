@@ -30,7 +30,7 @@ func (s *EmailTemplateServiceTestSuite) SetupSuite() {
 func (s *EmailTemplateServiceTestSuite) TearDownSuite() {
 	// Restore original working directory
 	if s.originalWorkDir != "" {
-		os.Chdir(s.originalWorkDir)
+		_ = os.Chdir(s.originalWorkDir)
 	}
 }
 
@@ -147,7 +147,7 @@ func (s *EmailTemplateServiceTestSuite) TestCompileAccountConfirmationTemplate_I
 	s.Require().NoError(err)
 
 	defer func() {
-		os.Chdir(originalWd)
+		_ = os.Chdir(originalWd)
 	}()
 
 	input := service.AccountConfirmationInput{
@@ -261,7 +261,7 @@ func (s *EmailTemplateServiceTestSuite) TestCompileAuthVerificationCodeTemplate_
 	s.Require().NoError(err)
 
 	defer func() {
-		os.Chdir(originalWd)
+		_ = os.Chdir(originalWd)
 	}()
 
 	name := "Jane Smith"
