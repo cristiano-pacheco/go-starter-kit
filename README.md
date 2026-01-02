@@ -13,7 +13,7 @@ graph TB
     Client[HTTP Client]
     
     subgraph API["API Layer"]
-        Server[Fiber HTTP Server]
+        Server[HTTP Server]
         Middleware[Middleware]
         Handlers[HTTP Handlers]
     end
@@ -21,6 +21,12 @@ graph TB
     subgraph Application["Application Layer"]
         UseCases[Use Cases]
         Services[Services]
+    end
+    
+    subgraph Ports["Ports (Interfaces)"]
+        RepositoryPorts[Repository Ports]
+        CachePorts[Cache Ports]
+        EventPorts[Event Ports]
     end
     
     subgraph Infrastructure["Infrastructure Layer"]
@@ -34,7 +40,7 @@ graph TB
     end
     
     subgraph Observability["Observability"]
-        Obs[Jaeger, Prometheus, Zerolog]
+        Obs[Traces, Metrics, Logs]
     end
     
     Client -->|HTTP| Server
@@ -43,13 +49,17 @@ graph TB
     Handlers --> UseCases
     
     UseCases -->|Optional| Services
-    UseCases --> Repositories
-    UseCases --> Cache
-    Services --> Repositories
-    Services --> Cache
+    UseCases --> RepositoryPorts
+    UseCases --> CachePorts
+    UseCases --> EventPorts
+    Services --> RepositoryPorts
+    Services --> CachePorts
+    Services --> EventPorts
     
-    UseCases --> EventProducers
-    Services --> EventProducers
+    RepositoryPorts -.->|implements| Repositories
+    CachePorts -.->|implements| Cache
+    EventPorts -.->|implements| EventProducers
+    EventPorts -.->|implements| EventConsumers
     
     Repositories --> DB
     Cache --> Redis
@@ -63,6 +73,9 @@ graph TB
     style Handlers fill:#FFB74D
     style UseCases fill:#FFA726
     style Services fill:#FF9800
+    style RepositoryPorts fill:#64B5F6
+    style CachePorts fill:#64B5F6
+    style EventPorts fill:#64B5F6
 ```
 
 ## Features
