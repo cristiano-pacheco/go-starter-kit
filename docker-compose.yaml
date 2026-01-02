@@ -4,7 +4,7 @@ services:
     volumes:
       - go-starter-kit-postgres:/data/postgres
     environment:
-      POSTGRES_DB: pingo
+      POSTGRES_DB: go-starter-kit
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: '123456789'
       PGDATA: /data/postgres
