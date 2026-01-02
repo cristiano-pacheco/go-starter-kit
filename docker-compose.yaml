@@ -1,8 +1,8 @@
 services:
-  pingo-postgres:
+  go-starter-kit-postgres:
     image: postgres:17.5-alpine
     volumes:
-      - pingo-postgres:/data/postgres
+      - go-starter-kit-postgres:/data/postgres
     environment:
       POSTGRES_DB: pingo
       POSTGRES_USER: postgres
@@ -13,25 +13,25 @@ services:
     networks:
       - backend
 
-  pingo-redis:
+  go-starter-kit-redis:
     image: redis:8-alpine
     container_name: redis
     ports:
       - "6379:6379"
     volumes:
-      - pingo-redis-data:/data
+      - go-starter-kit-redis-data:/data
     command: redis-server --appendonly yes
     networks:
       - backend
 
-  pingo-kafka:
+  go-starter-kit-kafka:
     image: apache/kafka-native
     ports:
       - "9092:9092"
     environment:
       # Configure listeners for both docker and host communication
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://pingo-kafka:9093
+      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://go-starter-kit-kafka:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
 
       # Settings required for KRaft mode
@@ -46,19 +46,19 @@ services:
       # Required for a single node cluster
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  pingo-kafka-ui:
+  go-starter-kit-kafka-ui:
     image: kafbat/kafka-ui:main
     ports:
       - 8080:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: "true"
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: pingo-kafka:9093
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: go-starter-kit-kafka:9093
     depends_on:
-      - pingo-kafka
+      - go-starter-kit-kafka
 
   # Jaeger
-  pingo-jaeger:
+  go-starter-kit-jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
     ports:
@@ -80,14 +80,14 @@ services:
       - backend
 
   # Prometheus
-  pingo-prometheus:
+  go-starter-kit-prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
-      - pingo-prometheus-data:/prometheus
+      - go-starter-kit-prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -96,17 +96,17 @@ services:
     networks:
       - backend
     depends_on:
-      - pingo-jaeger
+      - go-starter-kit-jaeger
 
   # Grafana
-  pingo-grafana:
+  go-starter-kit-grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "3000:3000"
     volumes:
-      - pingo-grafana-data:/var/lib/grafana
-      - pingo-grafana-data:/etc/grafana/provisioning
+      - go-starter-kit-grafana-data:/var/lib/grafana
+      - go-starter-kit-grafana-data:/etc/grafana/provisioning
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SECURITY_ADMIN_USER=admin
@@ -114,14 +114,14 @@ services:
     networks:
       - backend
     depends_on:
-      - pingo-prometheus
+      - go-starter-kit-prometheus
 
 volumes:
-  pingo-prometheus-data:
-  pingo-grafana-data:
-  pingo-postgres-data:
-  pingo-redis-data:
-  pingo-postgres:
+  go-starter-kit-prometheus-data:
+  go-starter-kit-grafana-data:
+  go-starter-kit-postgres-data:
+  go-starter-kit-redis-data:
+  go-starter-kit-postgres:
 
 networks:
   backend:
