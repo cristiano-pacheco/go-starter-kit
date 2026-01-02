@@ -61,28 +61,10 @@ For detailed API documentation, see [Swagger UI](http://localhost:9000/swagger/i
 
 ## Configuration
 
-Create a `.env` file:
+Copy the `.env.example` file to `.env` and update the values as needed:
 
 ```bash
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_NAME=go-starter-kit
-
-# Redis
-REDIS_HOST=localhost:6379
-
-# Kafka
-KAFKA_BROKERS=localhost:9092
-
-# JWT
-JWT_SECRET=your-secret-key
-JWT_EXPIRATION=24h
-
-# Server
-SERVER_PORT=9000
+cp .env.example .env
 ```
 
 ## Project Structure
