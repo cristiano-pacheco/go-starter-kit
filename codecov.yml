@@ -1,0 +1,32 @@
+coverage:
+  ignore:
+    # Ignore specific folders
+    - "main.go"
+    - "cmd/**"
+    - "docs/**"
+    - "config/**"
+    - "pkg/**"
+    - "vendor/**"
+    # Ignore all test files
+    - "**/*_test.go"
+    - "**/mock_**"
+    - "**/*_model.go"
+    - "**/*_repository.go"
+    - "**/*_dto.go"
+    - "**/*_handler.go"
+    - "internal/shared/**"
+  
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
