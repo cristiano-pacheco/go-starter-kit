@@ -6,6 +6,65 @@
 
 A scalable Go API starter kit with clean architecture principles, authentication, event-driven patterns, and observability.
 
+## Architecture
+
+```mermaid
+graph TB
+    Client[HTTP Client]
+    
+    subgraph API["API Layer"]
+        Server[Fiber HTTP Server]
+        Middleware[Middleware]
+        Handlers[HTTP Handlers]
+    end
+    
+    subgraph Application["Application Layer"]
+        UseCases[Use Cases]
+        Services[Services]
+    end
+    
+    subgraph Infrastructure["Infrastructure Layer"]
+        Repositories[Repositories]
+        Cache[Cache Layer]
+        EventProducers[Event Producers]
+        EventConsumers[Event Consumers]
+        DB[(PostgreSQL)]
+        Redis[(Redis)]
+        Kafka[Apache Kafka]
+    end
+    
+    subgraph Observability["Observability"]
+        Obs[Jaeger, Prometheus, Zerolog]
+    end
+    
+    Client -->|HTTP| Server
+    Server --> Middleware
+    Middleware --> Handlers
+    Handlers --> UseCases
+    
+    UseCases -->|Optional| Services
+    UseCases --> Repositories
+    UseCases --> Cache
+    Services --> Repositories
+    Services --> Cache
+    
+    UseCases --> EventProducers
+    Services --> EventProducers
+    
+    Repositories --> DB
+    Cache --> Redis
+    Kafka --> EventConsumers
+    EventConsumers --> UseCases
+    EventProducers --> Kafka
+    
+    Server -.->|Telemetry| Obs
+
+    style Server fill:#4CAF50
+    style Handlers fill:#FFB74D
+    style UseCases fill:#FFA726
+    style Services fill:#FF9800
+```
+
 ## Features
 
 - 🔐 JWT Authentication & Authorization
