@@ -77,4 +77,4 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: cristiano-pacheco/pingo
+          slug: cristiano-pacheco/go-starter-kit
