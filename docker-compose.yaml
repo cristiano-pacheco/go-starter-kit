@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: go-starter-kit
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: '123456789'
+      POSTGRES_PASSWORD: postgres
       PGDATA: /data/postgres
     ports:
       - '5432:5432'
