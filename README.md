@@ -1,6 +1,7 @@
 # Go Starter Kit
 
 [![Go Version](https://img.shields.io/badge/Go-1.25.5-blue.svg)](https://golang.org)
+[![codecov](https://codecov.io/gh/cristiano-pacheco/go-starter-kit/graph/badge.svg?token=NPIL8D7H6D)](https://codecov.io/gh/cristiano-pacheco/go-starter-kit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A scalable Go API starter kit with clean architecture principles, authentication, event-driven patterns, and observability.
