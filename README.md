@@ -40,6 +40,19 @@ make run
 Server runs at `http://localhost:9000`  
 Swagger docs at `http://localhost:9000/swagger/index.html`
 
+## API Endpoints
+
+### Authentication
+- `POST /api/v1/auth/login` - Authenticate user and send verification code
+- `POST /api/v1/auth/token` - Generate JWT token with verification code
+
+### Users
+- `POST /api/v1/users` - Create new user
+- `PUT /api/v1/users` - Update user (requires authentication)
+- `POST /api/v1/users/activate` - Activate user account
+
+For detailed API documentation, see [Swagger UI](http://localhost:9000/swagger/index.html) when the server is running.
+
 ## Requirements
 
 - Go 1.25.5+
