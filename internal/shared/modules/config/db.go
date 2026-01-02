@@ -4,7 +4,7 @@ type DB struct {
 	Host               string `mapstructure:"DB_HOST"`
 	Name               string `mapstructure:"DB_NAME"`
 	User               string `mapstructure:"DB_USER"`
-	Password           string `mapstructure:"DB_PASSWORD"`
+	Password           string `mapstructure:"DB_PASS"`
 	Port               uint   `mapstructure:"DB_PORT"`
 	MaxOpenConnections int    `mapstructure:"DB_MAX_OPEN_CONNECTIONS"`
 	MaxIdleConnections int    `mapstructure:"DB_MAX_IDLE_CONNECTIONS"`
