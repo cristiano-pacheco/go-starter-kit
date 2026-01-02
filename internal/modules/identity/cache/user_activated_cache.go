@@ -1,0 +1,83 @@
+package cache
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/cristiano-pacheco/go-starter-kit/pkg/redis"
+	redisClient "github.com/redis/go-redis/v9"
+)
+
+const (
+	cacheKeyPrefix = "user_activated:"
+	cacheTTL       = 24 * time.Hour
+)
+
+type UserActivatedCacheI interface {
+	Set(userID uint64) error
+	Get(userID uint64) (bool, error)
+	Delete(userID uint64) error
+}
+
+type UserActivatedCache struct {
+	redisClient redis.Redis
+}
+
+var _ UserActivatedCacheI = (*UserActivatedCache)(nil)
+
+func NewUserActivatedCache(redisClient redis.Redis) *UserActivatedCache {
+	return &UserActivatedCache{
+		redisClient: redisClient,
+	}
+}
+
+func (c *UserActivatedCache) Set(userID uint64) error {
+	key := c.buildKey(userID)
+	ctx := context.Background()
+
+	client := c.redisClient.Client()
+	if client == nil {
+		return errors.New("redis client is nil")
+	}
+
+	return client.Set(ctx, key, "1", cacheTTL).Err()
+}
+
+func (c *UserActivatedCache) Get(userID uint64) (bool, error) {
+	key := c.buildKey(userID)
+	ctx := context.Background()
+
+	client := c.redisClient.Client()
+	if client == nil {
+		return false, errors.New("redis client is nil")
+	}
+
+	result := client.Get(ctx, key)
+	if err := result.Err(); err != nil {
+		if errors.Is(err, redisClient.Nil) {
+			return false, nil // Key does not exist, user is not activated
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (c *UserActivatedCache) Delete(userID uint64) error {
+	key := c.buildKey(userID)
+	ctx := context.Background()
+
+	client := c.redisClient.Client()
+	if client == nil {
+		return errors.New("redis client is nil")
+	}
+
+	return client.Del(ctx, key).Err()
+}
+
+func (c *UserActivatedCache) buildKey(userID uint64) string {
+	return fmt.Sprintf("%s%s", cacheKeyPrefix, strconv.FormatUint(userID, 10))
+}

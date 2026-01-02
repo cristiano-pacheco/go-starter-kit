@@ -1,0 +1,401 @@
+basePath: /
+definitions:
+  dto.ActivateUserRequest:
+    properties:
+      token:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  dto.AuthGenerateJWTRequest:
+    properties:
+      code:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  dto.AuthLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.CreateContactRequest:
+    properties:
+      contact_data:
+        type: string
+      contact_type:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.UpdateContactRequest:
+    properties:
+      contact_data:
+        type: string
+      contact_type:
+        type: string
+      is_enabled:
+        type: boolean
+      name:
+        type: string
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  errs.Detail:
+    properties:
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+  errs.Error:
+    properties:
+      code:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/errs.Detail'
+        type: array
+      message:
+        type: string
+    type: object
+  response.Envelope:
+    additionalProperties: {}
+    type: object
+info:
+  contact: {}
+  description: Pingo API
+  title: Pingo API
+  version: "1.0"
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user credentials and send the verification code
+      parameters:
+      - description: Login credentials (email and password)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully generated token
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "400":
+          description: Invalid request format or validation error
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Authenticate the user
+      tags:
+      - Authentication
+  /api/v1/auth/token:
+    post:
+      consumes:
+      - application/json
+      description: Generate the JWT token for the user
+      parameters:
+      - description: Login credentials (email and password)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthGenerateJWTRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully generated token
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "400":
+          description: Invalid request format or validation error
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Generate authentication token
+      tags:
+      - Authentication
+  /api/v1/contacts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all contacts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved contacts
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      security:
+      - BearerAuth: []
+      summary: List contacts
+      tags:
+      - Contacts
+    post:
+      consumes:
+      - application/json
+      description: Creates a new contact
+      parameters:
+      - description: Contact data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateContactRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created contact
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "422":
+          description: Invalid request format or validation error
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      security:
+      - BearerAuth: []
+      summary: Create contact
+      tags:
+      - Contacts
+  /api/v1/contacts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing contact
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully deleted contact
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "404":
+          description: Contact not found
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      security:
+      - BearerAuth: []
+      summary: Delete contact
+      tags:
+      - Contacts
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing contact
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Contact data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateContactRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully updated contact
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "404":
+          description: Contact not found
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "422":
+          description: Invalid request format or validation error
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      security:
+      - BearerAuth: []
+      summary: Update contact
+      tags:
+      - Contacts
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user
+      parameters:
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created user
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "422":
+          description: Invalid request format or validation error
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Create user
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing user
+      parameters:
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully updated user
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "422":
+          description: Invalid request format or validation error
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Users
+  /api/v1/users/activate:
+    post:
+      consumes:
+      - application/json
+      description: Activates an existing user
+      parameters:
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ActivateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully activated user
+        "400":
+          description: Invalid request format or validation error
+          schema:
+            $ref: '#/definitions/errs.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.Error'
+      summary: Activate user
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: Enter your bearer token in the format **Bearer <token>**
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

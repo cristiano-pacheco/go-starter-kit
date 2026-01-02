@@ -1,0 +1,127 @@
+services:
+  pingo-postgres:
+    image: postgres:17.5-alpine
+    volumes:
+      - pingo-postgres:/data/postgres
+    environment:
+      POSTGRES_DB: pingo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: '123456789'
+      PGDATA: /data/postgres
+    ports:
+      - '5432:5432'
+    networks:
+      - backend
+
+  pingo-redis:
+    image: redis:8-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - pingo-redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - backend
+
+  pingo-kafka:
+    image: apache/kafka-native
+    ports:
+      - "9092:9092"
+    environment:
+      # Configure listeners for both docker and host communication
+      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://pingo-kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+
+      # Settings required for KRaft mode
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+
+      # Listener to use for broker-to-broker communication
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+
+      # Required for a single node cluster
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  pingo-kafka-ui:
+    image: kafbat/kafka-ui:main
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: pingo-kafka:9093
+    depends_on:
+      - pingo-kafka
+
+  # Jaeger
+  pingo-jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "5775:5775/udp"   # accept zipkin.thrift over compact thrift protocol
+      - "6831:6831/udp"   # accept jaeger.thrift over compact thrift protocol
+      - "6832:6832/udp"   # accept jaeger.thrift over binary thrift protocol
+      - "5778:5778"       # serve configs
+      - "16686:16686"     # serve frontend
+      - "14250:14250"     # accept model.proto
+      - "14268:14268"     # accept jaeger.thrift directly from clients
+      - "14269:14269"     # admin port: health check at / and metrics at /metrics
+      - "9411:9411"       # zipkin compatible endpoint
+      - "4317:4317"       # OTLP gRPC
+      - "4318:4318"       # OTLP HTTP
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - backend
+
+  # Prometheus
+  pingo-prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - pingo-prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - backend
+    depends_on:
+      - pingo-jaeger
+
+  # Grafana
+  pingo-grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - pingo-grafana-data:/var/lib/grafana
+      - pingo-grafana-data:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - backend
+    depends_on:
+      - pingo-prometheus
+
+volumes:
+  pingo-prometheus-data:
+  pingo-grafana-data:
+  pingo-postgres-data:
+  pingo-redis-data:
+  pingo-postgres:
+
+networks:
+  backend:

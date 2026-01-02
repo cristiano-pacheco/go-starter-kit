@@ -1,0 +1,61 @@
+package producer
+
+import (
+	"context"
+	"encoding/json"
+
+	"github.com/cristiano-pacheco/go-otel/trace"
+	"github.com/cristiano-pacheco/go-starter-kit/internal/modules/identity/event"
+	"github.com/cristiano-pacheco/go-starter-kit/internal/shared/modules/logger"
+	"github.com/cristiano-pacheco/go-starter-kit/pkg/kafka"
+	"go.uber.org/fx"
+)
+
+type UserCreatedProducerI interface {
+	Produce(ctx context.Context, message event.UserCreatedMessage) error
+}
+
+type UserCreatedProducer struct {
+	producer kafka.Producer
+}
+
+var _ UserCreatedProducerI = (*UserCreatedProducer)(nil)
+
+func NewUserCreatedProducer(
+	lc fx.Lifecycle,
+	logger logger.Logger,
+	kafkaBuilder kafka.Builder,
+) *UserCreatedProducer {
+	p := UserCreatedProducer{
+		producer: kafkaBuilder.BuildProducer(event.IdentityUserCreatedTopic),
+	}
+
+	lc.Append(fx.Hook{
+		OnStop: func(_ context.Context) error {
+			err := p.producer.Close()
+			if err != nil {
+				logger.Error().Msgf("failed to close producer: %v", err)
+			}
+			logger.Info().Msg("UserCreatedProducer closed successfully...")
+			return err
+		},
+	})
+
+	return &p
+}
+
+func (p *UserCreatedProducer) Produce(ctx context.Context, message event.UserCreatedMessage) error {
+	ctx, span := trace.Span(ctx, "UserCreatedProducer.Produce")
+	defer span.End()
+
+	msg, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+	m := kafka.Message{Value: msg}
+	err = p.producer.Produce(ctx, m)
+	if err != nil {
+		return err
+	}
+	return nil
+}
